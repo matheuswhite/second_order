@@ -7,6 +7,11 @@ fn main() {
     let c1 = 10e-6;
     let c2 = 100e-6;
 
+    with_library(r1, r2, c1, c2);
+    without_library(r1, r2, c1, c2);
+}
+
+fn with_library(r1: f64, r2: f64, c1: f64, c2: f64) {
     let a = Array2::from_shape_vec(
         (2, 2),
         vec![
@@ -24,7 +29,7 @@ fn main() {
     let mut v2_model = SS::<Euler, _>::new(a.clone(), b.clone(), vec![0.0, 1.0], 0.0);
     let mut v1_model = SS::<Euler, _>::new(a.clone(), b.clone(), vec![1.0, 0.0], 0.0);
     let mut graphs =
-        Plotter::new("C2 Voltage".to_string(), ["u(t)", "Vc1(t)", "Vc2(t)"]).with_light_theme();
+        Plotter::new("Voltages".to_string(), ["u(t)", "Vc1(t)", "Vc2(t)"]).with_light_theme();
 
     for dt in time {
         let u = dt * input.as_block();
@@ -36,7 +41,35 @@ fn main() {
 
     graphs.display();
 
-    let _ = graphs.save("second_order.png");
+    let _ = graphs.save("second_order_with_library.png");
 
     graphs.join();
+}
+
+fn without_library(r1: f64, r2: f64, c1: f64, c2: f64) {
+    let a = [
+        [-(1.0 / (c1 * r1) + 1.0 / (c1 * r2)), 1.0 / (c1 * r2)],
+        [1.0 / (c2 * r2), -(1.0 / (c2 * r2))],
+    ];
+    let b = [1.0 / (c1 * r1), 0.0];
+    let mut x = [0.0, 0.0];
+
+    println!("u(t),Vc1(t),Vc2(t)");
+
+    let dt = 1e-3;
+    let u = 1.0;
+    for total_time in 0..(4.0 / dt) as usize {
+        let dx = [
+            a[0][0] * x[0] + a[0][1] * x[1] + b[0] * u,
+            a[1][0] * x[0] + a[1][1] * x[1] + b[1] * u,
+        ];
+
+        x[0] += dx[0] * dt;
+        x[1] += dx[1] * dt;
+
+        let current_time = total_time as f64 * dt;
+        println!("{},{},{},{}", current_time, u, x[0], x[1]);
+    }
+
+    println!("!save,second_order_without_library.png");
 }
