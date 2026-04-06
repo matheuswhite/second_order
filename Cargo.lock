@@ -1369,7 +1369,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1257cd4248b4132760d6524d6dda4e053bc648c9070b960929bf50cfb1e7add"
 
 [[package]]
-name = "seocnd_order_model"
+name = "second_order_model"
 version = "0.1.0"
 dependencies = [
  "aule",
