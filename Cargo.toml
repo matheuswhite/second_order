@@ -5,4 +5,3 @@ edition = "2024"
 
 [dependencies]
 aule = { git = "https://github.com/matheuswhite/aule-rs.git", branch = "main" }
-ndarray = "0.16.1"

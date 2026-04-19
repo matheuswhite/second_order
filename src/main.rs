@@ -1,5 +1,4 @@
 use aule::prelude::*;
-use ndarray::Array2;
 
 fn main() {
     let r1 = 3.3e3;
@@ -12,27 +11,21 @@ fn main() {
 }
 
 fn with_library(r1: f64, r2: f64, c1: f64, c2: f64) {
-    let a = Array2::from_shape_vec(
-        (2, 2),
-        vec![
-            -(1.0 / (c1 * r1) + 1.0 / (c1 * r2)),
-            1.0 / (c1 * r2),
-            1.0 / (c2 * r2),
-            -(1.0 / (c2 * r2)),
-        ],
-    )
-    .unwrap();
-    let b = vec![1.0 / (c1 * r1), 0.0];
+    let a = mat![
+        [-(1.0 / (c1 * r1) + 1.0 / (c1 * r2)), 1.0 / (c1 * r2)],
+        [1.0 / (c2 * r2), -(1.0 / (c2 * r2))]
+    ];
+    let b = mat![[1.0 / (c1 * r1)], [0.0]];
 
-    let time = Time::new(1e-3, 4.0);
+    let simulation = Simulation::new(1e-3, 4.0);
     let mut input = Step::new(1.0);
-    let mut v2_model = SS::<Euler, _>::new(a.clone(), b.clone(), vec![0.0, 1.0], 0.0);
-    let mut v1_model = SS::<Euler, _>::new(a.clone(), b.clone(), vec![1.0, 0.0], 0.0);
+    let mut v2_model = SS::<Euler, _>::new(a.clone(), b.clone(), mat![[0.0, 1.0]], 0.0);
+    let mut v1_model = SS::<Euler, _>::new(a.clone(), b.clone(), mat![[1.0, 0.0]], 0.0);
     let mut graphs =
         Plotter::new("Voltages".to_string(), ["u(t)", "Vc1(t)", "Vc2(t)"]).with_light_theme();
 
-    for dt in time {
-        let u = dt * input.as_block();
+    for sim_state in simulation {
+        let u = sim_state * input.as_block();
         let c2_v = v2_model.output(u);
         let c1_v = v1_model.output(u);
 
