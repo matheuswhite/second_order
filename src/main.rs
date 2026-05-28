@@ -11,16 +11,32 @@ fn main() {
 }
 
 fn with_library(r1: f64, r2: f64, c1: f64, c2: f64) {
-    let a = mat![
-        [-(1.0 / (c1 * r1) + 1.0 / (c1 * r2)), 1.0 / (c1 * r2)],
-        [1.0 / (c2 * r2), -(1.0 / (c2 * r2))]
-    ];
-    let b = mat![[1.0 / (c1 * r1)], [0.0]];
+    let a = DMatrix::from_row_slice(
+        2,
+        2,
+        &[
+            -(1.0 / (c1 * r1) + 1.0 / (c1 * r2)),
+            1.0 / (c1 * r2),
+            1.0 / (c2 * r2),
+            -(1.0 / (c2 * r2)),
+        ],
+    );
+    let b = DMatrix::from_row_slice(2, 1, &[1.0 / (c1 * r1), 0.0]);
 
     let simulation = Simulation::new(1e-3, 4.0);
     let mut input = Step::new(1.0);
-    let mut v2_model = SS::<Euler, _>::new(a.clone(), b.clone(), mat![[0.0, 1.0]], 0.0);
-    let mut v1_model = SS::<Euler, _>::new(a.clone(), b.clone(), mat![[1.0, 0.0]], 0.0);
+    let mut v2_model = SS::<Euler, _>::new(
+        a.clone(),
+        b.clone(),
+        DMatrix::from_row_slice(1, 2, &[0.0, 1.0]),
+        0.0,
+    );
+    let mut v1_model = SS::<Euler, _>::new(
+        a.clone(),
+        b.clone(),
+        DMatrix::from_row_slice(1, 2, &[1.0, 0.0]),
+        0.0,
+    );
     let mut graphs =
         Plotter::new("Voltages".to_string(), ["u(t)", "Vc1(t)", "Vc2(t)"]).with_light_theme();
 
